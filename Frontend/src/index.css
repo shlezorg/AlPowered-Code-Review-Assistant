@@ -1,0 +1,75 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+/* Layout */
+main {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f4f4f4;
+}
+
+/* Left panel */
+.left {
+  flex: 1;
+  background: #000;
+  border-radius: 12px;
+  padding: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Code area */
+.code {
+  flex: 1;
+  overflow: auto;
+  border-radius: 10px;
+}
+
+/* Prism fix */
+.code pre[class*="language-"],
+.code code[class*="language-"] {
+  background: #000 !important;
+  margin: 0;
+}
+
+/* Review button */
+.review {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #e9e7f6;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.review:hover {
+  background: #d6d3f0;
+}
+
+/* Right panel */
+.right {
+  flex: 1;
+  background: #e5e7cf;
+  border-radius: 12px;
+  padding: 1rem;
+}
