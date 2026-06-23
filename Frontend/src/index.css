@@ -50,8 +50,8 @@ main {
 /* Review button */
 .review {
   position: absolute;
-  bottom: 15px;
-  right: 15px;
+  bottom: 20px;
+  right: 20px;
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
@@ -69,7 +69,9 @@ main {
 /* Right panel */
 .right {
   flex: 1;
-  background: #e5e7cf;
+  background: #333333;
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  color : #fff;
 }
