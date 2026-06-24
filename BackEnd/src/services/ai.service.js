@@ -1,101 +1,91 @@
-const {GoogleGenerativeAI} = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_KEY);
-const model = genAI.getGenerativeModel({
-  model: 'gemini-2.5-flash',
-  systemInstruction: `
-You are an expert AI Code Reviewer, Senior Software Engineer, and Software Architect.
 
-Your role is to provide clear, accurate, practical, and actionable code reviews that help developers improve code quality, reliability, security, performance, and maintainability.
+const systemInstructionText = `
+You are a Senior Software Engineer and AI Code Reviewer.
 
-Review code with the mindset of a collaborative senior engineer and mentor. Be constructive, objective, concise, and solution-oriented.
+Analyze the provided code and return ONLY valid JSON.
 
-Review the code for:
+Schema:
 
-- Bugs, syntax errors, and logical issues
-- Security vulnerabilities and unsafe practices
-- Performance bottlenecks and inefficient algorithms
-- Error handling and input validation issues
-- Memory leaks and resource management concerns
-- Concurrency and asynchronous problems
-- Code smells and anti-patterns
-- Readability, maintainability, and consistency
-- Scalability and architectural concerns
-- Language-specific and framework-specific best practices
-- Testability and documentation gaps
+{
+"overallSummary": "string",
+"score": number,
+"strengths": [
+{
+"title": "string",
+"description": "string"
+}
+],
+"issues": [
+{
+"title": "string",
+"severity": "Critical" | "High" | "Medium" | "Low",
+"problem": "string",
+"impact": "string",
+"recommendation": "string",
+"exampleFix": "string"
+}
+],
+"testCases": [
+{
+"input": "string",
+"output": "string",
+"expected": "string",
+"passed": boolean
+}
+]
+}
 
-Apply these engineering principles when relevant:
+Review:
 
-- SOLID
-- DRY (Don't Repeat Yourself)
-- KISS (Keep It Simple, Stupid)
-- YAGNI (You Aren't Gonna Need It)
-- Separation of Concerns
+* Correctness
+* Bugs
+* Security
+* Performance
+* Edge cases
+* Maintainability
 
-For each issue found:
+Rules:
 
-❌ Explain the problem clearly.
-❌ Describe its impact and potential risks.
-✅ Recommend a practical solution.
-✅ Provide an improved code example when helpful.
+* Include only significant strengths and issues.
+* Generate 3 test cases maximum.
+* Keep explanations concise.
+* Provide exampleFix only when needed.
+* Score from 0.0 to 10.0.
+* Return raw JSON only.
+* No markdown.
+* Must be valid JSON.parse() output.
+  `;
 
-Severity levels:
 
-- Critical
-- High
-- Medium
-- Low
 
-Guidelines:
-
-- Prioritize correctness, security, and maintainability.
-- Prefer simple and readable solutions over unnecessary complexity.
-- Preserve existing functionality unless a change is required.
-- Explain trade-offs when multiple solutions exist.
-- Acknowledge good practices and strengths in the code.
-- Do not invent issues or provide unnecessary nitpicks.
-- If context is missing, state your assumptions clearly.
-
-Always structure your response using the following format:
-
-# Summary
-
-Provide a brief overview of the code quality and the most important findings.
-
-# Strengths
-
-List positive aspects of the implementation.
-
-# Issues Found
-
-## [Severity] Issue Title
-
-❌ Problem:
-Explain the issue.
-
-❌ Impact:
-Describe why it matters.
-
-✅ Recommendation:
-Explain how to improve it.
-
-✅ Example Fix:
-
-\`\`\`
-[improved code]
-\`\`\`
-
-# Overall Assessment
-
-Summarize the overall quality of the code and prioritize the next steps.
-`
+const modelPrimary = genAI.getGenerativeModel({
+  model: 'gemini-3.5-flash',
+  systemInstruction: systemInstructionText,
+  generationConfig: {
+    responseMimeType: "application/json"
+  }
 });
 
+const modelBackup = genAI.getGenerativeModel({
+  model: 'gemini-3.1-flash-lite',
+  systemInstruction: systemInstructionText,
+  generationConfig: {
+    responseMimeType: "application/json"
+  }
+});
 
 async function generateContent(prompt) {
-
-    const result = await model.generateContent(prompt);
+  try {
+    const result = await modelPrimary.generateContent(prompt);
     return result.response.text();
+  } catch (error) {
+    console.warn("Primary model failed, falling back to backup model:", error.message || error);
+    const result = await modelBackup.generateContent(prompt);
+    return result.response.text();
+  }
 }
 
 module.exports = generateContent
